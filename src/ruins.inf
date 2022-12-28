@@ -32,9 +32,15 @@ Object  Statues "statues" Chamber
    has  scenery pluralname;
 
 Object  Pillars "pillars" Chamber
-  with  name "pillars" "marble",
+  with  name "pillars" "marble" "stone",
         description "Tall and imposing, they look like normal pillars to you.",
    has  scenery pluralname;
+
+Object  MagicDoor "door" Chamber
+  with  name "door" "stone" "massive",
+        initial "To the north, you see a massive stone door.",
+        description "It's a massive stone door, sealed shut with a series of ancient locks and puzzles.",
+   has  openable locked;
 
 Class  Potion,
   with name "potion",
@@ -73,6 +79,7 @@ Potion NightVisionPotion "potion of night vision"
                     purple color, with a faint shimmering glow.",
        before [;
         Drink: remove self;
+               give player light;  ! This is a very cheap way to give the player night vision
                "You take a sip of the potion and immediately feel a sense of calm and
                 peace wash over you. You feel as though you could see in the dark.";
        ];
@@ -102,12 +109,6 @@ Object  Mushrooms "mushrooms" Chamber
                 "You pick up a glowing mushroom and put it in your backpack.";
         ],
    has  scenery pluralname light;
-
-Object  MagicDoor "door" Chamber
-  with  name "door" "massive",
-        initial "To the north, you see a massive stone door.",
-        description "It's a massive stone door, sealed shut with a series of ancient locks and puzzles.",
-   has  openable locked;
 
 
 
