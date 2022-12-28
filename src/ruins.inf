@@ -1,0 +1,241 @@
+Constant Story "FROM THE RUINS";
+Constant Headline "^An Interactive Fiction^by Eric Nijakowski^";
+Constant DEBUG 1;
+
+Include "parser";
+Include "verblib";
+Include "grammar";
+
+Attribute alchemy;
+
+Verb 'shake' = 'swing';
+
+
+Object  Chamber "A Chamber"
+  with  description "You are in a large chamber filled with ancient stone statues and crumbling marble pillars.
+                     Dust and cobwebs hang heavy in the air, and the only light comes from some flourescent
+                     mushrooms in the walls.^
+                     Between two statues to the east, a dark narrow corridor leads deeper into the ruins.",
+        e_to NarrowCorridor,
+   has  light;
+
+Object  Statues "statues" Chamber
+  with  name "statues" "stone",
+        description "You are struck by the sight of several tall statues standing guard along the walls.
+                     Each one is carved from a single block of stone and depicts a mysterious cloaked
+                     figure, with a hood drawn low over their face and a staff held firmly in hand. You
+                     can't help but feel a sense of awe as you stand before these ancient sculptures,
+                     wondering at the stories they might tell if only they could speak.^
+                     The statues exude an air of secrecy and mystery, and you can't help but feel that
+                     they are more than just stone figures - they seem to be imbued with a deep,
+                     magical power.",
+   has  scenery pluralname;
+
+Object  Pillars "pillars" Chamber
+  with  name "pillars" "marble",
+        description "Tall and imposing, they look like normal pillars to you.",
+   has  scenery pluralname;
+
+Class  Potion,
+  with name "potion",
+       before [;
+        Drink: "You take a sip of the potion and find that it's refreshing and clean,
+                with no strange odors or colors.";
+        Drop: "That's a bad idea. You don't want to spill your potion.";
+       ],
+   has alchemy;
+
+Potion Water "water"
+  with name "water",
+       article "some",
+       description "You inspect the water in your flask and find that it's clear and clean,
+                    with no strange odors or colors.",
+       before [;
+        Drink: "You take a sip of the water and find that it's refreshing and clean,
+                with no strange odors or colors.";
+       ];
+
+Potion GruesomeConcoction "gruesome concoction"
+  with name "gruesome" "concoction",
+       article "some",
+       description "Some vile concoction that you brewed up in your flask. It smells
+                    absolutely disgusting, and you can't help but feel a sense of dread
+                    as you look at it.",
+       before [;
+        Drink: "You take a sip of the concoction and immediately regret it. It tastes
+                absolutely disgusting, and you can't help but feel a sense of dread
+                as you look at it.";
+       ];
+
+Potion NightVisionPotion "potion of night vision"
+  with name "night vision" "potion",
+       description "You inspect the potion in your flask and find that it's a deep, dark
+                    purple color, with a faint shimmering glow.",
+       before [;
+        Drink: remove self;
+               "You take a sip of the potion and immediately feel a sense of calm and
+                peace wash over you. You feel as though you could see in the dark.";
+       ];
+
+Object GlimmeringGlowcap
+  with name "glimmering glowcap" "glimmering" "glowcap" "glowcaps" "mushroom" "mushrooms",
+       short_name "glimmering glowcap",
+       description "You inspect the glowing mushroom in your hand, taking in its delicate,
+                    shimmering cap and slender stem. It's unlike anything you've ever seen
+                    before, and you can't help but feel a sense of awe as it emits a soft,
+                    gentle shimmer.",
+       before [;
+        Eat: "The mushroom has a strange, almost metallic taste, and you spit it out quickly.
+              Maybe your flask can help.";
+       ],
+  has  alchemy;
+
+! Alchemical effect: Night vision
+Object  Mushrooms "mushrooms" Chamber
+  with  name "mushroom" "mushrooms" "flourescent",
+        description "As you approach the glowing mushrooms, you can't help but feel a sense of awe - they're unlike
+                     anything you've ever seen before. Who knows what kind of magical properties they might possess?",
+        before [;
+          Take:
+                if (GlimmeringGlowcap notin nothing) "You already have plenty.";
+                move GlimmeringGlowcap to player;
+                "You pick up a glowing mushroom and put it in your backpack.";
+        ],
+   has  scenery pluralname light;
+
+Object  MagicDoor "door" Chamber
+  with  name "door" "massive",
+        initial "To the north, you see a massive stone door.",
+        description "It's a massive stone door, sealed shut with a series of ancient locks and puzzles.",
+   has  openable locked;
+
+
+
+Object  NarrowCorridor "A Narrow Corridor"
+  with  description "You are in a dark, narrow corridor, with a stone door to the north and a stone door to the south.
+                     The corridor is lit by a single torch on the wall.^
+                     To the west lies a large chamber.",
+        w_to Chamber;
+
+
+Object  Candle "candle"
+  with  name "candle",
+        fuel 320,
+        daemon [;
+            if (self hasnt on) {
+                StopDaemon(self);
+                rtrue;
+            }
+            if (self in player || self in location) {
+                if (self.fuel == 0) {
+                    print "Your candle flickers and dies.";
+                } else if (self.fuel == 30) {
+                    print "Your candle is getting dim.";
+                }
+            }
+            if (self.fuel == 0)
+                give self ~on ~light;
+            else
+                self.fuel = self.fuel - 1;
+        ],
+        before [;
+            Examine:  print "You take a closer look at your candle and realize that it's the only source of light you have in these dark, musty ruins. You're grateful to have it by your side.";
+                      print_ret " It can burn for ", (number) self.fuel, " more turns.";
+            Burn: <<SwitchOn self>>;
+            SwitchOn: if (self.fuel <= 0) "Unfortunately, it seems to have burned out.";
+        ],
+        after [;
+            SwitchOn: give self on light;
+                      StartDaemon(self);
+            SwitchOff: give self ~light;
+        ],
+   has  switchable;
+
+Object  Flask "flask"
+  with  name "flask",
+        description "You inspect your flask and find that it's made of sturdy glass, with a
+                     tight-fitting cork to keep your potions and elixirs safe and secure.",
+        invent [;
+          print "your trusty alchemist's flask";
+          if (child(self) ~= nothing) print " (containing ", (a) child(self), ")";
+          rtrue;
+        ],
+        before [ c;
+          Drink: if (child(self) == nothing) "There's nothing in your flask to drink.";
+                 c = child(self);
+                 <<Drink c>>;
+          Receive: if (noun hasnt alchemy) "This doesn't look like an alchemical ingredient.";
+                   if (child(self) == nothing) "You realize that without water you can brew no potion.
+                                                Luckily, there are puddles of water all around you.";
+                   if (child(self) ~= Water) "You already have an ingredient in your flask.";
+                   self.clear();
+          LetGo: "This doesn't work.";
+          Swing: self.shake(); rtrue;
+          Fill: move Water to self;
+                "You fill your flask with some water from a nearby puddle.";
+          Empty: if (child(self) == nothing) "There's nothing in your flask to empty.";
+                 self.clear();
+                 "You empty your flask of its contents.";
+        ],
+        after [;
+          Receive: "The liquid sloshes around in the flask as you put ", (the) noun, " in.";
+        ],
+        clear [;
+          while (child(self) ~= nothing)
+              remove child(self);
+        ],
+        shake [ ingredient;
+          if (child(self) == nothing) "There's nothing in your flask to shake.";
+          if (child(self) == Water) "You give your flask a shake and watch as the water sloshes around inside.";
+          if (random(3) ~= 1)
+            "You give your flask a shake and watch as the liquid sloshes around inside.";
+          ! The flask has been shaken enough to create an alchemical effect
+          ingredient = child(self);
+          self.clear();
+          print "You feel a strange sensation as the liquid in your flask begins to bubble and
+                  froth. After a few moments, the liquid settles and you're left with
+                  a new, magical elixir.^^";
+          ! TODO: Create a new elixir
+          switch (ingredient) {
+            GlimmeringGlowcap: move NightVisionPotion to self;
+                               "You have successfully created a potion of night vision!";
+            default: "However, after a few moments you notice that you've created a weird
+                      alchemical concoction that you're not sure what to do with. You quickly
+                      pour the liquid down a drain and vow to never try that again.";
+          }
+        ],
+   has  container open;
+
+[ SwordDesc;
+  print (string) random(
+    "You take a moment to appreciate your rusty sword, grateful for the protection it provides as you explore these mysterious ruins.^",
+    "You examine your rusty sword and find that it's covered in a thick layer of grime and rust. You wonder how many battles it has seen.^",
+    "You take a closer look at your rusty sword and realize that it's not as bad as it looks - with a little bit of cleaning and sharpening, it could be a decent weapon after all.^"
+  );
+];
+
+Object RustySword "rusty sword"
+  with name "sword" "blade" "rusty",
+       description [; SwordDesc(); ],
+       before [;
+                Swing: "You give your rusty sword a swing and nearly lose your balance - it's a good thing this thing isn't as heavy as it looks.";
+              ];
+
+
+[ Initialise;
+  Introduction();
+
+  location = Chamber;
+  move Candle to player;
+  move Flask to player;
+  move RustySword to player;
+];
+
+[ Introduction;
+  "As a young alchemist apprentice, you have always been drawn to the mysteries of the ancient ruins that lie hidden in the depths of the forest. So when you heard that the ruins were open to exploration, you knew you had to go and see them for yourself.^
+^
+As you make your way through the twisting corridors and abandoned chambers of the ruins, you begin to realize that you are not alone. Strange noises and shadows flit about in the corners of your vision, and you get the distinct feeling that you are being watched. Nevertheless, you push on, driven by a burning desire to uncover the secrets of these ancient structures.^
+^
+But before long, you become lost in the ruins. You turn a corner, and suddenly find yourself face to face with a massive stone door, sealed shut with a series of ancient locks and puzzles. You try to retrace your steps, but the way back is blocked by a crumbling wall. It seems that you are trapped. With no other options, you set to work solving the puzzles and unlocking the door. If you can find a way out of these ruins, you might just make it back to civilization in one piece. But if you fail, you may be doomed to wander these ancient halls forever...^";
+];
+
