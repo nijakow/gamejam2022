@@ -7,6 +7,7 @@ Include "verblib";
 Include "grammar";
 
 Attribute alchemy;
+Attribute fly;
 
 Verb 'shake' = 'swing';
 
@@ -84,6 +85,16 @@ Potion NightVisionPotion "potion of night vision"
                 peace wash over you. You feel as though you could see in the dark.";
        ];
 
+Potion FlightPotion "potion of flight"
+  with name "flight" "potion",
+       description "You inspect the potion in your flask and find that it's a light yellow color,
+                    with some blue clouds in it.",
+       before [;
+        Drink: remove self;
+               give player fly;  ! This is a very cheap way to give the player flight
+               "You take a sip of the potion and immediately lift a few feet into the air.";
+       ];
+
 Object GlimmeringGlowcap
   with name "glimmering glowcap" "glimmering" "glowcap" "glowcaps" "mushroom" "mushrooms",
        short_name "glimmering glowcap",
@@ -115,13 +126,28 @@ Object  NarrowCorridor "A Narrow Corridor"
                      The corridor is lit by a single torch on the wall.^
                      To the west lies a large chamber.",
         n_to RiddleRoom,
+        s_to BatRoom,
         w_to Chamber;
 
+Global  MistyRoomSolved = 0;
 
 Object  RiddleRoom "A Misty Room"
-  with  description "Thick clouds of mist hang heavy in the air, and you can't see more than a few feet in front of you.",
-        s_to NarrowCorridor;
-
+  with  description [;
+          if (MistyRoomSolved == 0)
+            "Thick clouds of mist hang heavy in the air, and you can't see more than a few feet in front of you.";
+          "The mist has cleared, and you can a doorway heading east.";
+        ],
+        cant_go "You can't see anything.",
+        e_to [;
+          if (MistyRoomSolved == 0)
+            "You can't see anything.";
+          return PitRoom;
+        ],
+        s_to [;
+          if (MistyRoomSolved == 0)
+            "You can't see anything.";
+          return NarrowCorridor;
+        ];
 
 ! "The riddler says 'I am the riddler. Answer my riddle, and I will let you pass.'"
 Object  TheRiddler "riddler" RiddleRoom
@@ -130,10 +156,9 @@ Object  TheRiddler "riddler" RiddleRoom
                      and you can't help but feel that it's watching you closely.",
         life [;
           Answer: switch (noun) {
-            'echo': {
-              remove self;
-              "The riddler says 'Correct. You may pass.'";
-            }
+            'echo': remove self;
+                    MistyRoomSolved = 1;
+                    "The riddler says 'You are correct. The riddle is solved, and you may pass.'^^The mist clears, revealing a doorway heading east.";
             'riddler': "The riddlers raspy laugh makes the room shake and echo. 'Yes, I am the riddler, but this is not the answer. Try again.'";
             default: "The riddler laughs in his deep, raspy voice. 'No, this is not the answer. Try again.'";
           }
@@ -165,6 +190,58 @@ Object  TheRiddler "riddler" RiddleRoom
     has scenery animate;
 
 
+Object PitRoom "The pit"
+  with description "You are in an elongated hall, with a high ceiling. Somewhere in the center runs a
+                    large pit, dividing the eastern and western ends of this place.",
+       e_to [;
+          if (player hasnt fly) "Did you forget about the pit? You can't fly, can you?";
+          print "You gently float over the pit, and land safely on the other side.^";
+          return EastBank;
+       ],
+       w_to RiddleRoom;
+
+Object Pit "a large pit"
+  with name 'pit' 'large',
+       description "The pit is truly bottomless indeed.",
+       found_in [; return ((location == PitRoom) || (location == EastBank)); ],
+       before [;
+         JumpIn, Jump: deadflag = 3; "You plummet through the silent void of darkness, cracking your skull against an outcrop of rock.";
+         JumpOver: "Not a chance.";
+         Enter: "You can't see the bottom of the pit, and you're not sure if it's safe to enter.";
+       ],
+   has scenery;
+
+Object EastBank "The east bank"
+  with description "You are on the eastern bank of the pit. The walls are covered in moss, and the floor is
+                    covered in a thick layer of leaves. To the west, a pit spans the center of the room.",
+       w_to [;
+          if (player hasnt fly) "Did you forget about the pit? You can't fly, can you?";
+          print "You gently float over the pit, and land safely on the other side.^";
+          return PitRoom;
+       ];
+
+Object BatRoom "A little cavern"
+  with description "You are in a small cavern, mighty stalagmites and stalactites give you a breathtaking view.",
+       n_to NarrowCorridor;
+
+Object Bat "bat" BatRoom
+  with name 'bat',
+       description "The bat is flying around in the room.",
+       before [;
+         Attack: if (RustySword notin player) "Without a sword? You can't even come close to the bat.";
+                 "You swing your sword at the bat, but it's as if you're swinging at thin air. You can't reach it.";
+         ThrownAt: if (noun ~= RustySword) "You can't throw that at the bat.";
+                   move RustySword to parent(self);
+                   move BatWing to parent(self);
+                   remove self;
+                   "You throw your sword at the bat, hitting it right in the head. The bat falls to the ground, dead.";
+       ],
+   has animate;
+
+Object  BatWing "a bat wing"
+  with  name 'wing' 'bat',
+        description "A severed bat wing from the bat you just killed.",
+    has alchemy;
 
 Object  Candle "candle"
   with  name "candle",
@@ -247,9 +324,11 @@ Object  Flask "flask"
           switch (ingredient) {
             GlimmeringGlowcap: move NightVisionPotion to self;
                                "You have successfully created a potion of night vision!";
-            default: "However, after a few moments you notice that you've created a weird
-                      alchemical concoction that you're not sure what to do with. You quickly
-                      pour the liquid down a drain and vow to never try that again.";
+            BatWing: move FlightPotion to self;
+                     "You have successfully created a potion of flight!";
+            default: move GruesomeConcoction to self;
+                     "However, after a few moments you notice that you've created a weird
+                      alchemical concoction that you're not sure what to do with.";
           }
         ],
    has  container open;
@@ -286,4 +365,3 @@ As you make your way through the twisting corridors and abandoned chambers of th
 ^
 But before long, you become lost in the ruins. You turn a corner, and suddenly find yourself face to face with a massive stone door, sealed shut with a series of ancient locks and puzzles. You try to retrace your steps, but the way back is blocked by a crumbling wall. It seems that you are trapped. With no other options, you set to work solving the puzzles and unlocking the door. If you can find a way out of these ruins, you might just make it back to civilization in one piece. But if you fail, you may be doomed to wander these ancient halls forever...^";
 ];
-
