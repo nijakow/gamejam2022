@@ -238,7 +238,7 @@ Object Bat "bat" BatRoom
        ],
    has animate;
 
-Object  BatWing "a bat wing"
+Object  BatWing "bat wing"
   with  name 'wing' 'bat',
         description "A severed bat wing from the bat you just killed.",
     has alchemy;
