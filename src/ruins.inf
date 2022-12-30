@@ -26,9 +26,9 @@ Object  Statues "statues" Chamber
                      Each one is carved from a single block of stone and depicts a mysterious cloaked
                      figure, with a hood drawn low over their face and a staff held firmly in hand. You
                      can't help but feel a sense of awe as you stand before these ancient sculptures,
-                     wondering at the stories they might tell if only they could speak.^
+                     wondering at the stories they might tell if only they could speak.^^
                      The statues exude an air of secrecy and mystery, and you can't help but feel that
-                     they are more than just stone figures - they seem to be imbued with a deep,
+                     they once were  more than just stone figures - they seem to be imbued with a deep,
                      magical power.",
    has  scenery pluralname;
 
@@ -40,8 +40,13 @@ Object  Pillars "pillars" Chamber
 Object  MagicDoor "door" Chamber
   with  name "door" "stone" "massive",
         initial "To the north, you see a massive stone door.",
-        description "It's a massive stone door, sealed shut with a series of ancient locks and puzzles.",
-   has  openable locked;
+        description "It's a massive stone door, sealed shut by a large crystal lock.",
+        with_key CrystalKey,
+        door_to [;
+          deadflag = 2;
+          "You walk through the door, back into the world of the living.";
+        ],
+   has  static door openable lockable locked;
 
 Class  Potion,
   with name "potion",
@@ -108,6 +113,17 @@ Object GlimmeringGlowcap
        ],
   has  alchemy;
 
+Object GreenMoss
+  with name "green moss" "green" "moss",
+       short_name "green moss",
+       article "some",
+       description "Some moss that you picked up from the walls on the east bank. It's a deep green color,
+                    with a soft, fuzzy texture.",
+       before [;
+        Eat: "Tastes like moss, with a slightly earthy tone.";
+       ],
+   has alchemy pluralname;
+
 ! Alchemical effect: Night vision
 Object  Mushrooms "mushrooms" Chamber
   with  name "mushroom" "mushrooms" "flourescent",
@@ -125,8 +141,9 @@ Object  NarrowCorridor "A Narrow Corridor"
   with  description "You are in a dark, narrow corridor, with a stone door to the north and a stone door to the south.
                      The corridor is lit by a single torch on the wall.^
                      To the west lies a large chamber.",
-        n_to RiddleRoom,
-        s_to BatRoom,
+        n_to [; if (location == thedark) "You can't see anything."; return RiddleRoom; ],
+        s_to [; if (location == thedark) "You can't see anything."; return BatRoom; ],
+        e_to "You can't see anything.",
         w_to Chamber;
 
 Global  MistyRoomSolved = 0;
@@ -135,7 +152,7 @@ Object  RiddleRoom "A Misty Room"
   with  description [;
           if (MistyRoomSolved == 0)
             "Thick clouds of mist hang heavy in the air, and you can't see more than a few feet in front of you.";
-          "The mist has cleared, and you can a doorway heading east.";
+          "The mist has cleared, and you can see a doorway heading east.";
         ],
         cant_go "You can't see anything.",
         e_to [;
@@ -149,6 +166,13 @@ Object  RiddleRoom "A Misty Room"
           return NarrowCorridor;
         ];
 
+Object Mist "mist" RiddleRoom
+  with  name 'mist' 'clouds' 'cloud',
+        description [;
+          "The mist is thick and heavy, and you can't see more than a few feet in front of you.";
+        ],
+   has  scenery;
+
 ! "The riddler says 'I am the riddler. Answer my riddle, and I will let you pass.'"
 Object  TheRiddler "riddler" RiddleRoom
   with  name 'voice' 'riddler',
@@ -157,9 +181,10 @@ Object  TheRiddler "riddler" RiddleRoom
         life [;
           Answer: switch (noun) {
             'echo': remove self;
+                    remove Mist;
                     MistyRoomSolved = 1;
                     "The riddler says 'You are correct. The riddle is solved, and you may pass.'^^The mist clears, revealing a doorway heading east.";
-            'riddler': "The riddlers raspy laugh makes the room shake and echo. 'Yes, I am the riddler, but this is not the answer. Try again.'";
+            'riddler': "The riddler's raspy laugh makes the room shake and echo. 'Yes, I am the riddler, but this is not the answer. Try again.'";
             default: "The riddler laughs in his deep, raspy voice. 'No, this is not the answer. Try again.'";
           }
           Ask: switch (second) {
@@ -183,14 +208,16 @@ Object  TheRiddler "riddler" RiddleRoom
             }
         ],
         each_turn [;
-            if (player in parent(self)) {
-                self.do_dialogue();
+            if (~MistyRoomSolved) {
+              if (player in parent(self)) {
+                  self.do_dialogue();
+              }
             }
         ],
     has scenery animate;
 
 
-Object PitRoom "The pit"
+Object PitRoom "The Pit"
   with description "You are in an elongated hall, with a high ceiling. Somewhere in the center runs a
                     large pit, dividing the eastern and western ends of this place.",
        e_to [;
@@ -211,7 +238,7 @@ Object Pit "a large pit"
        ],
    has scenery;
 
-Object EastBank "The east bank"
+Object EastBank "The East Bank"
   with description "You are on the eastern bank of the pit. The walls are covered in moss, and the floor is
                     covered in a thick layer of leaves. To the west, a pit spans the center of the room.",
        w_to [;
@@ -220,13 +247,34 @@ Object EastBank "The east bank"
           return PitRoom;
        ];
 
-Object BatRoom "A little cavern"
+Object Moss "moss" EastBank
+  with name 'moss' 'mosses',
+       article "some",
+       description "The moss is beautiful green, and it's so thick that you can't see the walls underneath.",
+       before [;
+          Take:
+                if (GreenMoss notin nothing) "You already have plenty.";
+                move GreenMoss to player;
+                "You pick up some of the moss and put it in your backpack.";
+       ],
+   has scenery;
+
+Object CrystalKey "crystal key" EastBank
+  with name 'key' 'crystal',
+       description "The key is made of crystal, and it's so clear that you can see your reflection in it.";
+
+Object BatRoom "A Little Cavern"
   with description "You are in a small cavern, mighty stalagmites and stalactites give you a breathtaking view.",
        n_to NarrowCorridor;
 
+Object Stalagmites "stalagmites and stalactites" BatRoom
+  with name 'stalagmites' 'stalactites',
+       description "The stalagmites and stalactites are so beautiful, you can't help but stare at them for a while.",
+   has scenery pluralname;
+
 Object Bat "bat" BatRoom
   with name 'bat',
-       description "The bat is flying around in the room.",
+       description "A brown little bat, fluttering happily around the room.",
        before [;
          Attack: if (RustySword notin player) "Without a sword? You can't even come close to the bat.";
                  "You swing your sword at the bat, but it's as if you're swinging at thin air. You can't reach it.";
@@ -279,7 +327,8 @@ Object  Candle "candle"
 Object  Flask "flask"
   with  name "flask",
         description "You inspect your flask and find that it's made of sturdy glass, with a
-                     tight-fitting cork to keep your potions and elixirs safe and secure.",
+                     tight-fitting cork to keep your potions and elixirs safe and secure.
+                     You might want to give it a shake every now and then.",
         invent [;
           print "your trusty alchemist's flask";
           if (child(self) ~= nothing) print " (containing ", (a) child(self), ")";
@@ -312,8 +361,6 @@ Object  Flask "flask"
         shake [ ingredient;
           if (child(self) == nothing) "There's nothing in your flask to shake.";
           if (child(self) == Water) "You give your flask a shake and watch as the water sloshes around inside.";
-          if (random(3) ~= 1)
-            "You give your flask a shake and watch as the liquid sloshes around inside.";
           ! The flask has been shaken enough to create an alchemical effect
           ingredient = child(self);
           self.clear();
@@ -353,7 +400,7 @@ Object RustySword "rusty sword"
   Introduction();
 
   location = Chamber;
-  move Candle to player;
+  ! move Candle to player;
   move Flask to player;
   move RustySword to player;
 ];
