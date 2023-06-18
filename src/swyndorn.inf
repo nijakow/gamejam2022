@@ -6,6 +6,10 @@ Include "parser";
 Include "verblib";
 Include "grammar";
 
+Class  Outdoors,
+  has  light;
+
+Include "a/ev/evergreen.inf";
 
 Object  TheVoid "The Void",
   with  description "You are in a void. Small clouds of white mist float around you.",
@@ -18,5 +22,5 @@ Object  TheVoid "The Void",
 [ Initialise;
   Introduction();
 
-  location = TheVoid;
+  location = Evergreen_CityGate;
 ];

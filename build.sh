@@ -2,4 +2,7 @@
 
 XPATH="`pwd`"
 
-inform6 src/swyndorn.inf ++$XPATH/../inform6lib
+cd src
+inform6 swyndorn.inf ++$XPATH/../inform6lib
+cd -
+mv src/swyndorn.z5 .
