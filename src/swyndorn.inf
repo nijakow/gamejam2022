@@ -1,0 +1,22 @@
+Constant Story "Swyndorn";
+Constant Headline "^An Interactive Fiction^by Eric Nijakowski^";
+Constant DEBUG 1;
+
+Include "parser";
+Include "verblib";
+Include "grammar";
+
+
+Object  TheVoid "The Void",
+  with  description "You are in a void. Small clouds of white mist float around you.",
+   has  light;
+
+[ Introduction;
+  print "(Introduction)^";
+];
+
+[ Initialise;
+  Introduction();
+
+  location = TheVoid;
+];
