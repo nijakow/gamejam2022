@@ -1,0 +1,19 @@
+
+Outdoors  Evergreen_CobblestoneRoad "Cobblestone Road",
+    with  description
+            "You find yourself on a winding cobblestone road that leads 
+            through the lush forest.^The road is well-maintained and easy to 
+            travel, offering a comfortable path for those journeying to and 
+            from Evergreen.^Occasional lanterns with blue flames light the way, 
+            casting an ethereal glow on the surrounding foliage. The air is 
+            filled with a refreshing scent of pine and damp earth, creating a 
+            sense of tranquility and adventure.",
+          w_to Evergreen_CityGate,
+          e_to Pinewatch,
+          s_to Evergreen_HiddenSanctuary;
+
+Outdoors  Evergreen_HiddenSanctuary "Hidden Sanctuary",
+    with  description
+            "You are in a hidden sanctuary, south of the main road that connects 
+            the city of Evergreen with the rest of the province.",
+          n_to Evergreen_CobblestoneRoad;

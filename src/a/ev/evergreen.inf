@@ -4,4 +4,28 @@ Outdoors  Evergreen_CityGate "Evergreen City Gate",
             "You stand in front of the Evergreen City Gate, a spacious 
              clearing before the massive gates of the city.^The plaza is 
              alive with activity as merchants, travelers, and guards come 
-             and go.";
+             and go.",
+          w_to Evergreen_EastGate,
+          se_to Evergreen_ForestPath,
+          e_to Evergreen_CobblestoneRoad;
+
+Outdoors  Evergreen_EastGate "East Gate",
+    with  description
+            "You're inside Evergreen, just beyond the East Gate.^Timbered 
+             houses with vines line the street ahead, while a long road 
+             stretches westward through the city.^A wooden sign on one of 
+             the buildings to the northwest catches your eye. It reads 
+             'The Greenleaf Inn' in elaborate script, inviting you to step 
+             inside for refreshment and rest.",
+          e_to Evergreen_CityGate,
+          nw_to Evergreen_GreenleafInn;
+
+Indoors  Evergreen_GreenleafInn "The Greenleaf Inn",
+    with  description
+            "You are in the Greenleaf Inn, a cozy tavern in the heart of 
+             Evergreen.^Tables and chairs fill the room, occupied by patrons 
+             enjoying lively conversations and laughter.^Behind the bar, a 
+             wide assortment of drinks awaits, while delicious aromas waft 
+             from the kitchen.^A friendly host stands behind the counter, 
+             ready to serve you with a warm smile.",
+          out_to Evergreen_EastGate;

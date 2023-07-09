@@ -1,0 +1,28 @@
+
+Outdoors  Evergreen_ForestPath "Forest Path",
+    with  description
+            "You continue along the forest path, surrounded by majestic 
+             trees on either side.^The path winds gently through the serene 
+             forest, revealing occasional patches of delicate wildflowers 
+             that dot the forest floor.^To the northwest, you catch a glimpse 
+             of the city gate of Evergreen, inviting you to explore further.",
+          nw_to Evergreen_CityGate,
+          e_to Evergreen_MossyBridge;
+
+Outdoors  Evergreen_MossyBridge "Mossy Bridge",
+    with  description
+            "You stand upon a mossy bridge made of smooth limestone, 
+             spanning a crystal-clear brook below.^Sunlight filters through 
+             the branches above, casting a dappled pattern of light and 
+             shadows on the bridge.^To the west, the forest path continues, 
+             beckoning you onward, while to the east, it leads back to the 
+             sunlit clearing.",
+          w_to Evergreen_ForestPath,
+          e_to Evergreen_SunlitClearing;
+
+Outdoors  Evergreen_SunlitClearing "Sunlit Clearing",
+    with  description
+            "You arrive at a sunlit clearing in a lush leafy forest.^A thin, 
+             well-trodden path leads off to the west, winding through the trees 
+             towards a small brook.",
+          w_to Evergreen_MossyBridge;

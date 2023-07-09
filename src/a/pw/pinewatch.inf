@@ -1,0 +1,17 @@
+
+Outdoors  Pinewatch "Pinewatch",
+    with  description
+            "You find yourself at the crossroads of Pinewatch, where 
+            the road from Evergreen joins the main trade route of the province.^
+            This bustling intersection is a hub of activity, frequented by 
+            merchants, travelers, and adventurers alike.^To the southeast, a 
+            well-worn road continues its journey, beckoning you to explore the 
+            provincial lands beyond. The road from Evergreen leads west, 
+            back toward the city.^To the northeast, you spot the welcoming 
+            facade of the Wayfarer's Rest, an inn that offers respite and 
+            refreshments to weary travelers.^Peering through the trees to 
+            the east, you catch glimpses of an old ruined watchtower, its tip 
+            rising above the forest canopy.",
+          w_to Evergreen_CobblestoneRoad;
+          ! e_to Pinewatch_ProvincialRoad,
+          ! s_to Pinewatch_WayfarersRest;

@@ -9,7 +9,13 @@ Include "grammar";
 Class  Outdoors,
   has  light;
 
+Class  Indoors,
+  has  light;
+
 Include "a/ev/evergreen.inf";
+Include "a/ev/forest_path.inf";
+Include "a/ev/cobblestone_road.inf";
+Include "a/pw/pinewatch.inf";
 
 Object  TheVoid "The Void",
   with  description "You are in a void. Small clouds of white mist float around you.",
